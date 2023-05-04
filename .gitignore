@@ -5,3 +5,5 @@ results/
 
 # Ignore .env file
 .env
+.DS_Store
+.ipynb_checkpoints/
