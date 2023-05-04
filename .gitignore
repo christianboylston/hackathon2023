@@ -1,0 +1,7 @@
+# Ignore compressed_models and models directories
+compressed_models/
+models/
+results/
+
+# Ignore .env file
+.env

@@ -1,0 +1,13 @@
+jupyter==1.0.0
+ipykernel==6.22.0
+boto3==1.26.125
+sagemaker==2.151.0
+transformers==4.28.1
+torch==2.0.0
+streamlit==1.22.0
+streamlit-chat==0.0.2.2
+pandas==2.0.1
+requests==2.29.0
+snowflake-connector-python==3.0.3
+python-dotenv==1.0.0
+datasets==2.12.0
