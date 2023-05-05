@@ -2,6 +2,7 @@
 compressed_models/
 models/
 results/
+wandb/
 model/
 
 # Ignore .env file
