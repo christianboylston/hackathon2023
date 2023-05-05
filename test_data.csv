@@ -1,0 +1,21 @@
+text,label
+suffering consequences,qa_definition
+did ben's email have an attachment,email_query
+find a train ticket to philadelphia,transport_ticket
+i hate this song,music_dislikeness
+open parcheese game for you and i,play_game
+add a reminder of a conference for tomorrow in new york,calendar_set
+please power down,iot_wemo_off
+olly there's a good band playing tonight at nine at jazz bar i want to go,calendar_set
+please load new email for bruce and send message now,email_sendemail
+any cultural events in california,recommendation_events
+show me reviews of my nearest location food court,recommendation_locations
+what time will the soccer match be tonight,calendar_query
+cancel everything on my calendar,calendar_remove
+for every odd numbered sunday set a reminder for,calendar_set
+run coffee maker,iot_coffee
+describe the new football game rules,general_quirky
+what gun shows are in tulsa,recommendation_events
+tell me the largest ocean in the world,qa_factoid
+play for me the game harry potter and the chamber of secrets,play_game
+mild or heavy weather,weather_query
