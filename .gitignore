@@ -2,6 +2,17 @@
 compressed_models/
 models/
 results/
+model/
 
 # Ignore .env file
 .env
+
+#Ignore Metaflow Outputs
+.metaflow/
+
+#Ignore virtual environment
+venv/
+
+#Other stuff
+__pycache__/
+.DS_store
