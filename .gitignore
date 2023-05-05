@@ -3,8 +3,17 @@ compressed_models/
 models/
 results/
 wandb/
+model/
 
 # Ignore .env file
 .env
-.DS_Store
-.ipynb_checkpoints/
+
+#Ignore Metaflow Outputs
+.metaflow/
+
+#Ignore virtual environment
+venv/
+
+#Other stuff
+__pycache__/
+.DS_store

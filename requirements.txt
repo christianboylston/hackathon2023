@@ -13,3 +13,4 @@ python-dotenv==1.0.0
 datasets==2.12.0
 scikit-learn==1.2.2
 wandb==0.15.1
+metaflow==2.8.0
