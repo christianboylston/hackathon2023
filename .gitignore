@@ -17,3 +17,6 @@ venv/
 #Other stuff
 __pycache__/
 .DS_store
+
+#Model files
+*.tar.gz

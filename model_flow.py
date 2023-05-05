@@ -1,4 +1,4 @@
-from metaflow import FlowSpec, step, current, conda, batch, environment, Parameter
+from metaflow import FlowSpec, step, current, conda, batch, environment, Parameter, IncludeFile
 from dotenv import load_dotenv
 from custom_decorators import enable_decorator, pip
 import os
@@ -20,6 +20,7 @@ class TrainFlow(FlowSpec):
     model_file = Parameter("model_file", default="model")
     delete_enpoint = Parameter("delete_endpoint", default=True)
     endpoint_name = Parameter("endpoint_name", default=f"intent-endpoint")
+    
     
     @environment(vars={
         "SF_USER":os.environ["SF_USER"],

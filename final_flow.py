@@ -1,4 +1,4 @@
-from metaflow import FlowSpec, step, current, conda, batch, environment, Parameter
+from metaflow import FlowSpec, step, current, conda, batch, environment, Parameter, IncludeFile
 from dotenv import load_dotenv
 from custom_decorators import enable_decorator, pip
 import os
@@ -20,6 +20,9 @@ class TrainFlow(FlowSpec):
     model_file = Parameter("model_file", default="model")
     delete_enpoint = Parameter("delete_endpoint", default=True)
     endpoint_name = Parameter("endpoint_name", default=f"intent-endpoint")  ## Note the change
+    passed_test = Parameter("passed_tests", default=True)
+    test_behave = Parameter("test_behave", default=False)
+    test_data = IncludeFile("test_data", default="./test_data.csv")
     
     @environment(vars={
         "SF_USER":os.environ["SF_USER"],
@@ -178,45 +181,69 @@ class TrainFlow(FlowSpec):
         
         # Upload the file to the S3 bucket
         s3.upload_file(self.input_file, self.bucket_name, self.object_key)
+        self.next(self.behavioral_tests)
+        
+    @step
+    def behavioral_tests(self):
+        from nlptest import Harness
+        from io import StringIO
+        import pandas as pd
+        
+        df = pd.read_csv(StringIO(self.test_data))
+        df.to_csv("test_data.csv", index=False)
+
+        # Make sure to specify data='path_to_data' when using custom models
+        h = Harness(task='text-classification', model=self.model, hub='huggingface', data="test_data.csv") # Make sure the file is in the path
+
+        # Generate, run and get a report on your test cases
+        report = h.generate().run().report()
+        # report
+
+        robustness_score = int(report[report["test_type"]=="american_to_british"]["pass_rate"].values[0][:-1]) 
+        if robustness_score < 80:
+            self.passed_test = False
+        print(self.passed_test)
+        
         self.next(self.deploy)
         
     @step
     def deploy(self):
-        from sagemaker.huggingface.model import HuggingFaceModel
-        from sagemaker.serverless import ServerlessInferenceConfig
-        import sagemaker
-        
-        sess = sagemaker.Session()
-        role = "SageMakerRole"
-        sagemaker_session_bucket="loyalhackathon"
-        sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
-     
-        # create Hugging Face Model Class
-        huggingface_model = HuggingFaceModel(
-        model_data=f"s3://{self.bucket_name}/{self.object_key}",
-        role="SageMakerRole",         # iam role with permissions to create an Endpoint
-        transformers_version="4.12",  # transformers version used
-        pytorch_version="1.9",        # pytorch version used
-        py_version='py38',            # python version used
-        )
-        
-        # Specify MemorySizeInMB and MaxConcurrency in the serverless config object
-        serverless_config = ServerlessInferenceConfig(
-            memory_size_in_mb=3072, max_concurrency=1,
-        )
-        
-        predictor = huggingface_model.deploy(
-            serverless_inference_config=serverless_config,
-            endpoint_name=self.endpoint_name)
+        if self.passed_test:
+            from sagemaker.huggingface.model import HuggingFaceModel
+            from sagemaker.serverless import ServerlessInferenceConfig
+            import sagemaker
             
-        data = {
-        "inputs": "I love this song"
-        }
+            sess = sagemaker.Session()
+            role = "SageMakerRole"
+            sagemaker_session_bucket="loyalhackathon"
+            sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
+        
+            # create Hugging Face Model Class
+            huggingface_model = HuggingFaceModel(
+            model_data=f"s3://{self.bucket_name}/{self.object_key}",
+            role="SageMakerRole",         # iam role with permissions to create an Endpoint
+            transformers_version="4.12",  # transformers version used
+            pytorch_version="1.9",        # pytorch version used
+            py_version='py38',            # python version used
+            )
+            
+            # Specify MemorySizeInMB and MaxConcurrency in the serverless config object
+            serverless_config = ServerlessInferenceConfig(
+                memory_size_in_mb=3072, max_concurrency=1,
+            )
+            
+            predictor = huggingface_model.deploy(
+                serverless_inference_config=serverless_config,
+                endpoint_name=self.endpoint_name)
+                
+            data = {
+            "inputs": "I love this song"
+            }
 
-        res = predictor.predict(data=data)
-        print(res)
-        if self.delete_enpoint:
-            predictor.delete_endpoint()
+            res = predictor.predict(data=data)
+            print(res)
+            if self.delete_enpoint:
+                predictor.delete_endpoint()
         self.next(self.end)
         
 
